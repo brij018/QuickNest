@@ -1,13 +1,22 @@
 import express from "express";
 
-import add from "../controller/userController.js";
+import userManager from "../controller/userController.js";
+import validate from "../middleware/validate.js";
+import registerSchema from "../validation/registerSchema.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/login", (req, res) => {
-  res.render("login");
-});
+router.post("/register", validate(registerSchema), userManager.add);
 
-router.post("/add", add);
+router.get("/login", userManager.login);
+
+router.get("/profile", auth, (req, res) => {
+  res.json({
+    success: true,
+    message: "Protected route accessed",
+    user: req.user,
+  });
+});
 
 export default router;

@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    number: {
+    phone: {
       type: Number,
       required: true,
       trim: true,
@@ -46,6 +46,26 @@ userSchema.pre("save", async function () {
     user.password = await bcrypt.hash(user.password, 8);
   }
 });
+
+userSchema.statics.findByCredentials = async function (email, password) {
+  try {
+    const user = await this.findOne({ email });
+
+    if (!user) {
+      throw new Error("unable to login");
+    }
+
+    const isMatched = await bcrypt.compare(password, user.password);
+
+    if (!isMatched) {
+      throw new Error("unable to login");
+    }
+
+    return user;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const userModel = mongoose.model("user", userSchema);
 
